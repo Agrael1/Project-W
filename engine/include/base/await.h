@@ -1,18 +1,23 @@
 #pragma once
 #include <base/thread_pool.h>
-#include <winrt/base.h>
-
-winrt::fire_and_forget a;
+#include <winrt/windows.foundation.h>
+#include <exception>
+#include <base/await_traits.h>
 
 namespace w {
     namespace detail {
+        /// @brief Resumes the coroutine on the background thread pool
+        /// @param handle Coroutine handle to resume
         inline void resume_background(std::coroutine_handle<> handle) noexcept
         {
             base::get_thread_pool().submit(handle);
         }
     }
 
-    // Resumes current coroutine on the background thread pool
+    /// @brief Resumes the coroutine on the background thread pool
+    /// Current coroutine execution will be suspended and resumed on the background thread pool
+    /// Suspension means that the control will be returned to the caller, and the coroutine will be resumed later
+    /// @return Awaitable object
     [[nodiscard]] inline auto resume_background() noexcept
     {
         struct awaitable
@@ -35,7 +40,9 @@ namespace w {
         return awaitable{};
     }
 
-    // fire_and_forget promise type
+    /// @brief Fire and forget coroutine, does not return any value
+    /// If an exception is thrown during the coroutine execution, it will be rethrown on final_suspend
+    /// Executes eagerly, can be used as a top-level coroutine
     struct fire_and_forget
     {
         fire_and_forget get_return_object() const noexcept
@@ -43,9 +50,7 @@ namespace w {
             return{};
         }
 
-        void return_void() const noexcept
-        {
-        }
+        void return_void() const noexcept { }
 
         std::suspend_never initial_suspend() const noexcept
         {
@@ -54,16 +59,14 @@ namespace w {
 
         std::suspend_never final_suspend() const noexcept
         {
-            return{};
+            return {};
         }
 
-        void unhandled_exception() const noexcept
+        void unhandled_exception() const // throws exception
         {
-            std::terminate();
+            throw;
         }
     };
-
-
 } // namespace w::base
 
 namespace std {
