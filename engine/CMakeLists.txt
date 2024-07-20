@@ -1,6 +1,6 @@
 project(WEngine)
 
-set(HEADERS "include/graphics.h" "include/swapchain.h" "include/base/thread_pool.h" "include/base/await.h" "include/base/await_traits.h")
+set(HEADERS "include/graphics.h" "include/swapchain.h" "include/base/thread_pool.h" "include/base/await.h" "include/base/await_traits.h" "include/base/tasks.h")
 set(SOURCES "src/graphics.cpp" "src/base/thread_pool.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})

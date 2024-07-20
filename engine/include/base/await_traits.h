@@ -11,4 +11,13 @@ namespace w::detail
         { t.await_suspend(std::coroutine_handle<>{}) };
         { t.await_resume() };
     };
+
+    template<typename T>
+    concept is_promise = requires(T t)
+    {
+        { t.get_return_object() };
+        { t.initial_suspend() } -> is_awaiter;
+        { t.final_suspend() } -> is_awaiter;
+        { t.unhandled_exception() };
+    };
 }
