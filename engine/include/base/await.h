@@ -3,6 +3,7 @@
 #include <base/await_traits.h>
 #include <coroutine>
 
+
 namespace w {
     namespace detail {
         /// @brief Resumes the coroutine on the background thread pool
@@ -188,12 +189,22 @@ namespace w {
         }
 
         template<typename Promise>
-        std::coroutine_handle<> await_suspend(std::coroutine_handle<Promise> handle) const noexcept
+        void await_suspend(std::coroutine_handle<Promise> handle) const noexcept
         {
-            return handle.promise().get_continuation();
+            auto continuation = handle.promise().get_continuation();
+            if (continuation)
+                continuation.resume();
         }
     };
 } // namespace w
+
+
+
+
+
+
+
+
 
 namespace std {
     template<typename ...Args>
