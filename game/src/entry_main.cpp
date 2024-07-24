@@ -22,8 +22,10 @@ w::task<void> async_task2()
 
 w::action<void> async_action()
 {
-    //co_await w::resume_background();
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    co_await w::resume_background();
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    //throw 1;
 
     std::cout << "Hello from async_action!" << std::endl;
     co_return;
@@ -35,10 +37,10 @@ w::fire_and_forget async_task()
 
     auto a = async_action();
     std::this_thread::sleep_for(std::chrono::seconds(3));
+    //throw 1;
 
     co_await a;
     std::cout << "Hello from async_task!" << std::endl;
-    throw 1;
 }
 
 int main()

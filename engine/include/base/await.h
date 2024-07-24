@@ -179,6 +179,14 @@ namespace w {
     /// with provided continuation
     struct continued_awaitable
     {
+        continued_awaitable() noexcept = default;
+        continued_awaitable(std::coroutine_handle<> continuation) noexcept
+            : continuation(continuation)
+        {
+        }
+
+    public:
+
         bool await_ready() const noexcept
         {
             return false;
@@ -188,13 +196,13 @@ namespace w {
         {
         }
 
-        template<typename Promise>
-        void await_suspend(std::coroutine_handle<Promise> handle) const noexcept
+        void await_suspend(std::coroutine_handle<> handle) const noexcept
         {
-            auto continuation = handle.promise().get_continuation();
-            if (continuation)
-                continuation.resume();
+            if (continuation) continuation.resume();
         }
+
+    private:
+        std::coroutine_handle<> continuation;
     };
 } // namespace w
 

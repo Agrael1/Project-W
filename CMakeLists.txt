@@ -3,6 +3,8 @@
 #
 cmake_minimum_required (VERSION 3.22)
 
+option(PROJECTW_TESTS "Build the tests" ON)
+
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -13,7 +15,11 @@ project ("WEngine")
 
 include(FetchContent)
 include(cmake/deps.cmake)
-include(cmake/cppwinrt.cmake)
 
 add_subdirectory("engine")
 add_subdirectory("game")
+
+if(PROJECTW_TESTS)
+  enable_testing()
+  add_subdirectory("test")
+endif()

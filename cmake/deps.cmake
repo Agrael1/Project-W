@@ -1,3 +1,5 @@
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+
 find_package(wisdom QUIET)
 if(NOT wisdom_FOUND)
   FetchContent_Declare(
