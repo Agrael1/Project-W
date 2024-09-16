@@ -36,7 +36,6 @@ w::fire_and_forget async_task()
     //co_await async_task2();
 
     auto a = async_action();
-    std::this_thread::sleep_for(std::chrono::seconds(3));
     //throw 1;
 
     co_await a;
@@ -49,7 +48,6 @@ int main()
     try
     {
         async_task();
-        std::this_thread::sleep_for(std::chrono::seconds(10));
     }
     catch (int e)
     {

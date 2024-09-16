@@ -196,13 +196,13 @@ namespace w {
         {
         }
 
-        void await_suspend(std::coroutine_handle<> handle) const noexcept
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<> handle) const noexcept
         {
-            if (continuation) continuation.resume();
+            return continuation;
         }
 
     private:
-        std::coroutine_handle<> continuation;
+        std::coroutine_handle<> continuation = std::noop_coroutine();
     };
 } // namespace w
 

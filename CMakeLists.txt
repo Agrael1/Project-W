@@ -2,6 +2,7 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.22)
+project ("WEngine")
 
 option(PROJECTW_TESTS "Build the tests" ON)
 
@@ -11,10 +12,11 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("WEngine")
 
-include(FetchContent)
+# CPM package manager
 include(cmake/deps.cmake)
+
+set(CPM_SOURCE_CACHE "${CMAKE_BINARY_DIR}/_deps" CACHE STRING "Where to cache CPM dependencies")
 
 add_subdirectory("engine")
 add_subdirectory("game")
