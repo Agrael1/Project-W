@@ -44,7 +44,7 @@ w::fire_and_forget async_task()
 
 int main()
 {
-    auto scoped_pool = w::base::thread_pool::init_scoped();
+    //auto scoped_pool = w::base::thread_pool::init_scoped();
     try
     {
         async_task();

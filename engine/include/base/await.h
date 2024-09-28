@@ -10,7 +10,7 @@ namespace w {
         /// @param handle Coroutine handle to resume
         inline void resume_background(std::coroutine_handle<> handle) noexcept
         {
-            base::get_thread_pool().submit(handle);
+            //base::get_thread_pool().submit(handle);
         }
     }
 
