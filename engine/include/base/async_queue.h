@@ -65,8 +65,6 @@ stealing_deque<T, buffer_size>::try_pop() noexcept
     _bottom.store(b, std::memory_order_seq_cst);
 
     value_type item = _items.get_unchecked(b, std::memory_order_relaxed);
-    t = _top.load(std::memory_order_seq_cst);
-
     if (b > t) {
         return item;
     }
@@ -76,8 +74,6 @@ stealing_deque<T, buffer_size>::try_pop() noexcept
             _bottom.store(t + 1, std::memory_order_relaxed);
             return item;
         }
-        _bottom.store(t, std::memory_order_relaxed);
-        return _items.nullval;
     }
     _bottom.store(t, std::memory_order_relaxed);
     return _items.nullval;
@@ -87,7 +83,7 @@ template<class T, size_t buffer_size>
 std::optional<typename stealing_deque<T, buffer_size>::value_type>
 stealing_deque<T, buffer_size>::try_steal() noexcept
 {
-    auto t = _top.load(std::memory_order_acquire);
+    auto t = _top.load(std::memory_order_relaxed);
     auto b = _bottom.load(std::memory_order_seq_cst);
     auto size = static_cast<std::intptr_t>(b) - static_cast<std::intptr_t>(t);
     if (size <= 0) {
