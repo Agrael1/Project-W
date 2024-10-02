@@ -7,6 +7,8 @@ set(HEADERS
 "include/base/await.h" 
 "include/base/await_traits.h" 
 "include/base/tasks.h"  
+"include/base/atomic_buffer.h"  
+  
   
   
  "include/base/async_queue.h")

@@ -1,6 +1,6 @@
 project("test-basic")
 
-set(TEST_SOURCES "coro_test.cpp")
+set(TEST_SOURCES "coro_test.cpp" "async_queue.cpp")
 
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
 target_link_libraries(
