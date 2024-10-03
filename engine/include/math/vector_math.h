@@ -1,8 +1,9 @@
+#pragma once
 #include <math/vector.h>
+
 
 namespace w::math {
 namespace detail {
-
 template<int Components>
 consteval inline int dp_imm8() noexcept
 {
@@ -12,16 +13,6 @@ consteval inline int dp_imm8() noexcept
 
     int bit_selector = (1 << Components) - 1;
     return bit_selector | (bit_selector << 4); // use the same selector for all components in upper 4 bits
-}
-template<size_t Components>
-constexpr float get_or(vector v, size_t component, float other) noexcept
-{
-    float arrdata[4] = { v[0], v[1], v[2], v[3] };
-    if (component < Components) {
-        return arrdata[component];
-    } else {
-        return other;
-    }
 }
 } // namespace detail
 
@@ -69,19 +60,57 @@ constexpr inline vector operator/(vector a, float b) noexcept
 {
     return a / vector(b, broadcast);
 }
+constexpr inline vector operator|(vector a, vector b) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { float(uint32_t(a[0]) | uint32_t(b[0])),
+                 float(uint32_t(a[1]) | uint32_t(b[1])),
+                 float(uint32_t(a[2]) | uint32_t(b[2])),
+                 float(uint32_t(a[3]) | uint32_t(b[3])) };
+    } else {
+        return _mm_or_ps(a, b);
+    }
+}
+constexpr inline vector operator&(vector a, vector b) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { float(uint32_t(a[0]) & uint32_t(b[0])),
+                 float(uint32_t(a[1]) & uint32_t(b[1])),
+                 float(uint32_t(a[2]) & uint32_t(b[2])),
+                 float(uint32_t(a[3]) & uint32_t(b[3])) };
+    } else {
+        return _mm_and_ps(a, b);
+    }
+}
+constexpr inline vector operator^(vector a, vector b) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { float(uint32_t(a[0]) ^ uint32_t(b[0])),
+                 float(uint32_t(a[1]) ^ uint32_t(b[1])),
+                 float(uint32_t(a[2]) ^ uint32_t(b[2])),
+                 float(uint32_t(a[3]) ^ uint32_t(b[3])) };
+    } else {
+        return _mm_xor_ps(a, b);
+    }
+}
+
 
 template<size_t Components = 3>
     requires(Components <= 4)
 constexpr inline vector opposite(vector a) noexcept
 {
     if (std::is_constant_evaluated()) {
+
         return {
-            -get_or<Components>(a, 0, -a[0]), -get_or<Components>(a, 1, -a[1]), -get_or<Components>(a, 2, -a[2]), -get_or<Components>(a, 3, -a[3])
+            -a[0],
+            Components > 1 ? -a[1] : a[1],
+            Components > 2 ? -a[2] : a[2],
+            Components > 3 ? -a[3] : a[3],
         };
     } else {
         constexpr auto eval = [](size_t thresh) constexpr { return Components > thresh ? -0.0f : 0.0f; };
         constexpr static float4 mask = { eval(0), eval(1), eval(2), eval(3) };
-        return _mm_xor_ps(a, mask);
+        return _mm_xor_ps(a, vector(mask));
     }
 }
 
@@ -91,10 +120,10 @@ constexpr inline vector dot(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
         // clang-format off
-        return { get_or<Components>(a, 0, 0) * get_or<Components>(b, 0, 0) 
-               + get_or<Components>(a, 1, 0) * get_or<Components>(b, 1, 0) 
-               + get_or<Components>(a, 2, 0) * get_or<Components>(b, 2, 0) 
-               + get_or<Components>(a, 3, 0) * get_or<Components>(b, 3, 0), broadcast };
+        return { a[0] * b[0] 
+               + a[1] * b[1] 
+               + a[2] * b[2] 
+               + a[3] * b[3], broadcast };
         // clang-format on
     } else {
         return _mm_dp_ps(a, b, dp_imm8<Components>());
@@ -136,11 +165,36 @@ constexpr inline vector length(vector a) noexcept
 {
     if (std::is_constant_evaluated()) {
         auto lsq = length_sq<Components>(a);
-        return {
-            lsq, lsq, lsq, lsq
-        };
+        float l = std::sqrt(lsq[0]);
+        return { l, l, l, l };
     } else {
         return _mm_sqrt_ps(length_sq<Components>(a));
+    }
+}
+
+template<size_t Components = 3>
+    requires(Components <= 4)
+constexpr inline bool equal(vector a, vector b) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
+    } else {
+        constexpr auto value = detail::dp_imm8<Components>() & 0xF;
+        return (_mm_movemask_ps(_mm_cmpeq_ps(a, b)) & value) == value;
+    }
+}
+
+template<size_t Components = 3>
+    requires(Components <= 4)
+constexpr inline vector fmadd(vector a, vector b, vector c) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { a[0] * b[0] + c[0],
+                 a[1] * b[1] + c[1],
+                 a[2] * b[2] + c[2],
+                 a[3] * b[3] + c[3] };
+    } else {
+        return _mm_fmadd_ps(a, b, c);
     }
 }
 } // namespace w::math

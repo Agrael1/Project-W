@@ -41,7 +41,7 @@ public:
         : r{ { x0, y0, z0, w0 }, { x1, y1, z1, w1 }, { x2, y2, z2, w2 }, { x3, y3, z3, w3 } }
     {
     }
-    float4x4(matrix m) noexcept
+    constexpr float4x4(matrix m) noexcept
     {
         r[0] = float4(m[0]);
         r[1] = float4(m[1]);
@@ -62,6 +62,14 @@ public:
 
 public:
     float4 r[4];
+};
+
+// constants 
+constexpr matrix identity = {
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.0f, 1.0f, 0.0f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 0.0f, 1.0f }
 };
 
 } // namespace w::math
