@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <math/matrix_math.h>
+#include <math/quaternion_math.h>
 
 using namespace w::math;
 

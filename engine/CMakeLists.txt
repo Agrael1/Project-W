@@ -12,7 +12,8 @@ set(HEADERS
 "include/math/vector_math.h"  
 "include/math/matrix.h"  
 "include/math/matrix_math.h"  
-  
+"include/math/quaternion.h"  
+"include/math/quaternion_math.h"
   
   
  "include/base/async_queue.h")

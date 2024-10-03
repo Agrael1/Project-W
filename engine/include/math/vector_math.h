@@ -197,4 +197,12 @@ constexpr inline vector fmadd(vector a, vector b, vector c) noexcept
         return _mm_fmadd_ps(a, b, c);
     }
 }
+
+template<size_t Components = 3>
+    requires(Components <= 4)
+constexpr inline vector normalize(vector a) noexcept
+{
+    auto length_v = length<Components>(a);
+    return length_v ? a / length_v : a;
+}
 } // namespace w::math
