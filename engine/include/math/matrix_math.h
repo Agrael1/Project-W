@@ -4,9 +4,56 @@
 namespace w::math {
 constexpr matrix multiply(const matrix& a, const matrix& b) noexcept
 {
-    if (std::is_constant_evaluated())
-    {
+    if (std::is_constant_evaluated()) {
+        matrix result;
+        // Cache the invariants in registers
+        float x = a[0][0];
+        float y = a[0][1];
+        float z = a[0][2];
+        float w = a[0][3];
+        // Perform the operation on the first row
 
+        result[0] = {
+            (b[0][0] * x) + (b[1][0] * y) + (b[2][0] * z) + (b[3][0] * w),
+            (b[0][1] * x) + (b[1][1] * y) + (b[2][1] * z) + (b[3][1] * w),
+            (b[0][2] * x) + (b[1][2] * y) + (b[2][2] * z) + (b[3][2] * w),
+            (b[0][3] * x) + (b[1][3] * y) + (b[2][3] * z) + (b[3][3] * w),
+        };
+
+        // Repeat for all the other rows
+        x = a[1][0];
+        y = a[1][1];
+        z = a[1][2];
+        w = a[1][3];
+        result[1] = {
+            (b[0][0] * x) + (b[1][0] * y) + (b[2][0] * z) + (b[3][0] * w),
+            (b[0][1] * x) + (b[1][1] * y) + (b[2][1] * z) + (b[3][1] * w),
+            (b[0][2] * x) + (b[1][2] * y) + (b[2][2] * z) + (b[3][2] * w),
+            (b[0][3] * x) + (b[1][3] * y) + (b[2][3] * z) + (b[3][3] * w),
+        };
+
+        x = a[2][0];
+        y = a[2][1];
+        z = a[2][2];
+        w = a[2][3];
+        result[2] = {
+            (b[0][0] * x) + (b[1][0] * y) + (b[2][0] * z) + (b[3][0] * w),
+            (b[0][1] * x) + (b[1][1] * y) + (b[2][1] * z) + (b[3][1] * w),
+            (b[0][2] * x) + (b[1][2] * y) + (b[2][2] * z) + (b[3][2] * w),
+            (b[0][3] * x) + (b[1][3] * y) + (b[2][3] * z) + (b[3][3] * w),
+        };
+
+        x = a[3][0];
+        y = a[3][1];
+        z = a[3][2];
+        w = a[3][3];
+        result[3] = {
+            (b[0][0] * x) + (b[1][0] * y) + (b[2][0] * z) + (b[3][0] * w),
+            (b[0][1] * x) + (b[1][1] * y) + (b[2][1] * z) + (b[3][1] * w),
+            (b[0][2] * x) + (b[1][2] * y) + (b[2][2] * z) + (b[3][2] * w),
+            (b[0][3] * x) + (b[1][3] * y) + (b[2][3] * z) + (b[3][3] * w),
+        };
+        return result;
     } else {
         __m256 t0 = _mm256_castps128_ps256(a.r[0]);
         t0 = _mm256_insertf128_ps(t0, a.r[1], 1);
@@ -53,6 +100,5 @@ constexpr matrix multiply(const matrix& a, const matrix& b) noexcept
         };
     }
 }
-
 
 } // namespace w::math

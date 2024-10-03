@@ -16,8 +16,8 @@ consteval inline int dp_imm8() noexcept
 template<size_t Components>
 constexpr float get_or(vector v, size_t component, float other) noexcept
 {
-    float arrdata[4] = { v.x, v.y, v.z, v.w };
-    if constexpr (Components > 0) {
+    float arrdata[4] = { v[0], v[1], v[2], v[3] };
+    if (component < Components) {
         return arrdata[component];
     } else {
         return other;
@@ -28,7 +28,7 @@ constexpr float get_or(vector v, size_t component, float other) noexcept
 constexpr inline vector operator+(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
-        return { a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w };
+        return { a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3] };
     } else {
         return _mm_add_ps(a, b);
     }
@@ -36,7 +36,7 @@ constexpr inline vector operator+(vector a, vector b) noexcept
 constexpr inline vector operator-(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
-        return { a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w };
+        return { a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3] };
     } else {
         return _mm_sub_ps(a, b);
     }
@@ -44,7 +44,7 @@ constexpr inline vector operator-(vector a, vector b) noexcept
 constexpr inline vector operator*(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
-        return { a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w };
+        return { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] };
     } else {
         return _mm_mul_ps(a, b);
     }
@@ -60,7 +60,7 @@ constexpr inline vector operator*(float a, vector b) noexcept
 constexpr inline vector operator/(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
-        return { a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w };
+        return { a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3] };
     } else {
         return _mm_div_ps(a, b);
     }
@@ -76,7 +76,7 @@ constexpr inline vector opposite(vector a) noexcept
 {
     if (std::is_constant_evaluated()) {
         return {
-            -get_or<Components>(a, 0, -a.x), -get_or<Components>(a, 1, -a.y), -get_or<Components>(a, 2, -a.z), -get_or<Components>(a, 3, -a.w)
+            -get_or<Components>(a, 0, -a[0]), -get_or<Components>(a, 1, -a[1]), -get_or<Components>(a, 2, -a[2]), -get_or<Components>(a, 3, -a[3])
         };
     } else {
         constexpr auto eval = [](size_t thresh) constexpr { return Components > thresh ? -0.0f : 0.0f; };
@@ -105,10 +105,10 @@ constexpr inline vector dot(vector a, vector b) noexcept
 constexpr inline vector cross(vector a, vector b) noexcept
 {
     if (std::is_constant_evaluated()) {
-        return { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x, 0.0f };
+        return { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0], 0.0f };
     } else {
-        constexpr static uint4 mask = { 0, 0, 0, 0xFFFFFFFF };
-        
+        constexpr uint4 mask = { 0, 0, 0, 0xFFFFFFFF };
+
         vector t1 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 0, 2, 1)); // y,z,x,w
         vector t2 = _mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 1, 0, 2)); // z,x,y,w
 
@@ -134,6 +134,13 @@ template<size_t Components = 3>
     requires(Components <= 4)
 constexpr inline vector length(vector a) noexcept
 {
-    return _mm_sqrt_ps(length_sq<Components>(a));
+    if (std::is_constant_evaluated()) {
+        auto lsq = length_sq<Components>(a);
+        return {
+            lsq, lsq, lsq, lsq
+        };
+    } else {
+        return _mm_sqrt_ps(length_sq<Components>(a));
+    }
 }
 } // namespace w::math

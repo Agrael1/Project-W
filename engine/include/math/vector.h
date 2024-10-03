@@ -24,10 +24,7 @@ struct vector {
     constexpr vector(float x, float y, float z, float w) noexcept
     {
         if (std::is_constant_evaluated()) {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-            this->w = w;
+            arrdata = { x, y, z, w };
         } else {
             data = _mm_set_ps(w, z, y, x);
         }
@@ -35,10 +32,7 @@ struct vector {
     constexpr vector(float x, broadcast_t) noexcept
     {
         if (std::is_constant_evaluated()) {
-            this->x = x;
-            this->y = x;
-            this->z = x;
-            this->w = x;
+            arrdata = { x, x, x, x };
         } else {
             data = _mm_broadcast_ss(&x);
         }
@@ -59,21 +53,19 @@ struct vector {
     constexpr explicit operator float() const noexcept
     {
         if (std::is_constant_evaluated()) {
-            return x;
+            return arrdata[0];
         } else {
             return _mm_cvtss_f32(data);
         }
+    }
+    constexpr decltype(auto) operator[](size_t i) const noexcept
+    {
+        return arrdata[i];
     }
 
 public:
     union {
         std::array<float, 4> arrdata;
-        struct {
-            float x, y, z, w;
-        };
-        struct {
-            float r, g, b, a;
-        };
         __m128 data{};
     };
 };

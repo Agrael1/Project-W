@@ -34,6 +34,13 @@ public:
         : r{ { xdata[0], xdata[1], xdata[2], xdata[3] }, { xdata[4], xdata[5], xdata[6], xdata[7] }, { xdata[8], xdata[9], xdata[10], xdata[11] }, { xdata[12], xdata[13], xdata[14], xdata[15] } }
     {
     }
+    constexpr float4x4(float x0, float y0, float z0, float w0,
+                       float x1, float y1, float z1, float w1,
+                       float x2, float y2, float z2, float w2,
+                       float x3, float y3, float z3, float w3) noexcept
+        : r{ { x0, y0, z0, w0 }, { x1, y1, z1, w1 }, { x2, y2, z2, w2 }, { x3, y3, z3, w3 } }
+    {
+    }
     float4x4(matrix m) noexcept
     {
         r[0] = float4(m[0]);
