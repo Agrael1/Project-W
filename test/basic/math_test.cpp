@@ -1,0 +1,37 @@
+#include <catch2/catch_test_macros.hpp>
+#include <math/vector_math.h>
+
+using namespace w::math;
+
+static_assert(sizeof(w::math::vector) == 16, "vector size must be 16 bytes");
+static_assert(alignof(w::math::vector) == 16, "vector alignment must be 16 bytes");
+
+void test_vector_addition_constexpr()
+{
+    constexpr vector a(1.0f, 2.0f, 3.0f, 4.0f);
+    constexpr vector b(5.0f, 6.0f, 7.0f, 8.0f);
+    constexpr vector c = a + b;
+    static_assert(c.x == 6.0f);
+    static_assert(c.y == 8.0f);
+    static_assert(c.z == 10.0f);
+    static_assert(c.w == 12.0f);
+}
+
+TEST_CASE("vector_add")
+{
+    vector a(1.0f, 2.0f, 3.0f, 4.0f);
+    vector b(5.0f, 6.0f, 7.0f, 8.0f);
+    vector c = a + b;
+    REQUIRE(c.x == 6.0f);
+    REQUIRE(c.y == 8.0f);
+    REQUIRE(c.z == 10.0f);
+    REQUIRE(c.w == 12.0f);
+
+    float4 d(1.0f, 2.0f, 3.0f, 4.0f);
+    float4 e(5.0f, 6.0f, 7.0f, 8.0f);
+    float4 f = d + e;
+    REQUIRE(f.x == 6.0f);
+    REQUIRE(f.y == 8.0f);
+    REQUIRE(f.z == 10.0f);
+    REQUIRE(f.w == 12.0f);
+}

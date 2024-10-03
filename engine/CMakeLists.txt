@@ -8,6 +8,10 @@ set(HEADERS
 "include/base/await_traits.h" 
 "include/base/tasks.h"  
 "include/base/atomic_buffer.h"  
+"include/math/vector.h"  
+"include/math/vector_math.h"  
+"include/math/matrix.h"  
+"include/math/matrix_math.h"  
   
   
   
