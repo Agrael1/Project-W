@@ -14,6 +14,8 @@ set(HEADERS
 "include/math/matrix_math.h"  
 "include/math/quaternion.h"  
 "include/math/quaternion_math.h"
+"include/ecs/transform.h"
+"include/ecs/camera.h"
   
   
  "include/base/async_queue.h")

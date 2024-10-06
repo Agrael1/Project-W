@@ -198,4 +198,24 @@ constexpr matrix transpose(const matrix& a) noexcept
         };
     }
 }
+constexpr matrix look_to(vector eye, vector direction, vector up) noexcept
+{
+    using enum detail::swizzle_mask;
+    vector f = normalize(direction);
+    vector r = normalize(cross(up, f));
+    vector u = cross(f, r);
+
+    vector neg_eye = -eye;
+
+    vector d0 = dot(r, neg_eye);
+    vector d1 = dot(u, neg_eye);
+    vector d2 = dot(f, neg_eye);
+
+    return {
+        select<0b0001>(r, d0),
+        select<0b0001>(u, d1),
+        select<0b0001>(f, d2),
+        identity[3]
+    };
+}
 } // namespace w::math

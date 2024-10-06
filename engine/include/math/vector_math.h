@@ -1,7 +1,6 @@
 #pragma once
 #include <math/vector.h>
 
-
 namespace w::math {
 namespace detail {
 template<int Components>
@@ -12,7 +11,7 @@ consteval inline int dp_imm8() noexcept
     // 0 -> 0b0000, 1 -> 0b0001, 2 -> 0b0011, 3 -> 0b0111, 4 -> 0b1111
 
     int bit_selector = (1 << Components) - 1;
-    return bit_selector | (bit_selector << 4); // use the same selector for all components in upper 4 bits
+    return (0b1111) | (bit_selector << 4); // use the same selector for all components in upper 4 bits
 }
 } // namespace detail
 
@@ -93,7 +92,14 @@ constexpr inline vector operator^(vector a, vector b) noexcept
         return _mm_xor_ps(a, b);
     }
 }
-
+constexpr inline vector operator-(vector a) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { -a[0], -a[1], -a[2], -a[3] };
+    } else {
+        return _mm_xor_ps(a, vector(-0.0f, -0.0f, -0.0f, -0.0f));
+    }
+}
 
 template<size_t Components = 3>
     requires(Components <= 4)
@@ -121,12 +127,13 @@ constexpr inline vector dot(vector a, vector b) noexcept
     if (std::is_constant_evaluated()) {
         // clang-format off
         return { a[0] * b[0] 
-               + a[1] * b[1] 
-               + a[2] * b[2] 
-               + a[3] * b[3], broadcast };
+               + Components > 1 ? a[1] * b[1] : 0
+               + Components > 2 ? a[2] * b[2] : 0 
+               + Components > 3 ? a[3] * b[3] : 0
+            , broadcast };
         // clang-format on
     } else {
-        return _mm_dp_ps(a, b, dp_imm8<Components>());
+        return _mm_dp_ps(a, b, detail::dp_imm8<Components>());
     }
 }
 
@@ -204,5 +211,18 @@ constexpr inline vector normalize(vector a) noexcept
 {
     auto length_v = length<Components>(a);
     return length_v ? a / length_v : a;
+}
+
+template <uint32_t bool_mask>
+constexpr inline vector select(vector a, vector b) noexcept
+{
+    if (std::is_constant_evaluated()) {
+        return { bool_mask & 1 ? a[0] : b[0],
+                 bool_mask & 2 ? a[1] : b[1],
+                 bool_mask & 4 ? a[2] : b[2],
+                 bool_mask & 8 ? a[3] : b[3] };
+    } else {
+        return _mm_blend_ps(a, b, bool_mask);
+    }
 }
 } // namespace w::math

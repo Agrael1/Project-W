@@ -70,6 +70,18 @@ public:
 public:
     alignas(Alignment) std::array<T, Components> data{};
 };
+
+enum swizzle_mask : int{
+    x = 0,
+    y = 1,
+    z = 2,
+    w = 3
+};
+
+consteval int swizzle(int component_a0, int component_a1, int component_b0, int component_b1) noexcept
+{
+    return _MM_SHUFFLE(component_b1, component_b0, component_a1, component_a0);
+}
 } // namespace detail
 
 struct vector {
@@ -320,11 +332,18 @@ struct alignas(alignof(__m128)) float2a : float2 {
 
 // constatnts
 //-------------------------------------------------------------------------
-static inline constexpr uint4a identity_mask[4] = {
-    { 0xffffffff, 0, 0, 0 },
-    { 0, 0xffffffff, 0, 0 },
-    { 0, 0, 0xffffffff, 0 },
-    { 0, 0, 0, 0xffffffff }
+static inline constexpr vector identity_mask[4] = {
+    uint4a{ 0xffffffff, 0, 0, 0 },
+    uint4a{ 0, 0xffffffff, 0, 0 },
+    uint4a{ 0, 0, 0xffffffff, 0 },
+    uint4a{ 0, 0, 0, 0xffffffff }
 };
+static inline constexpr vector neg_identity_mask[4] = {
+    uint4a{ 0, 0xffffffff, 0xffffffff, 0xffffffff },
+    uint4a{ 0xffffffff, 0, 0xffffffff, 0xffffffff },
+    uint4a{ 0xffffffff, 0xffffffff, 0, 0xffffffff },
+    uint4a{ 0xffffffff, 0xffffffff, 0xffffffff, 0 }
+};
+
 
 } // namespace w::math
