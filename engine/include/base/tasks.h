@@ -52,11 +52,18 @@ public:
     {
         if constexpr (std::is_void_v<return_type>) {
             return;
-        } else if constexpr (promise_type::is_movable) {
-            return std::move(coroutine->promise().result.value);
         } else {
-            return coroutine->promise().result.value;
+            auto handle = coroutine.as<promise_type>();
+            return handle.promise().get_result();
         }
+    }
+
+    decltype(auto) get() noexcept
+    {
+        auto handle = coroutine.as<promise_type>();
+        auto& promise = handle.promise();
+        promise.wait_finish_internal();
+        return await_resume();
     }
 
 protected:
@@ -122,11 +129,11 @@ public:
         requires !std::is_void_v<ResultType>
     {
         if constexpr (std::is_reference_v<ResultType>) {
-            return *result.value;
+            return *result;
         } else if constexpr (is_movable) {
-            return std::move(result.value);
+            return std::move(result);
         } else {
-            return result.value;
+            return result;
         }
     }
 
@@ -137,7 +144,7 @@ public:
     }
 
 protected:
-    std::coroutine_handle<> continuation;
+    std::coroutine_handle<> continuation = std::noop_coroutine();
     result_type result{};
 
     mutable bool waited = false;
