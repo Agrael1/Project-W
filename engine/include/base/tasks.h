@@ -137,7 +137,7 @@ public:
     }
 
 protected:
-    std::coroutine_handle<> continuation;
+    std::coroutine_handle<> continuation = std::noop_coroutine();
     result_type result{};
 
     mutable bool waited = false;

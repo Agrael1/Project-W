@@ -58,7 +58,7 @@ stealing_deque<T, buffer_size>::try_pop() noexcept
     auto b = _bottom.load(std::memory_order_relaxed);
     auto t = _top.load(std::memory_order_relaxed);
     if (b == t) {
-        return false;
+        return std::nullopt;
     }
 
     --b;

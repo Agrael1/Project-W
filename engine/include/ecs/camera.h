@@ -3,8 +3,8 @@
 
 namespace w::ecs {
 struct camera : public transform {
+private:
     mutable math::float4x4a view;
-
 public:
     math::matrix get_view() const noexcept
     {
@@ -16,5 +16,4 @@ public:
         return view;
     }
 };
-
 }

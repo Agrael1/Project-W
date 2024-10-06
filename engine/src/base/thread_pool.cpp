@@ -1,8 +1,7 @@
+#include <base/await.h>
 #include <base/thread_pool.h>
 
+void w::detail::resume_background(std::coroutine_handle<> handle) noexcept
+{
 
-//w::base::thread_pool& w::base::get_thread_pool()
-//{
-//    static w::base::thread_pool thread_pool;
-//    return thread_pool;
-//}
+}
