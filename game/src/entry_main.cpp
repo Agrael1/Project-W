@@ -5,6 +5,7 @@
 
 static w::action<int> async_main()
 {
+    co_await w::resume_background();
     std::cout << "Hello from async_main!" << std::endl;
     co_return 42;
 }

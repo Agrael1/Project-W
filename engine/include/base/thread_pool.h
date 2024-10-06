@@ -22,6 +22,21 @@ public:
     {
         return thread.get_stop_token().stop_requested();
     }
+    std::optional<std::coroutine_handle<>> steal_task() noexcept
+    {
+        do {
+            auto val = queue.try_steal();
+            if (val == std::nullopt) {
+                return std::nullopt;
+            }
+            full.store(false, std::memory_order::relaxed);
+
+            if (val && val.value()) {
+                return val;
+            }
+            // else: try again
+        } while (true);
+    }
     std::optional<std::coroutine_handle<>> pop_task() noexcept
     {
         do {
@@ -29,6 +44,7 @@ public:
             if (val == std::nullopt) {
                 return std::nullopt;
             }
+            full.store(false, std::memory_order::relaxed);
 
             if (val && val.value()) {
                 return val;
@@ -97,6 +113,7 @@ private:
                 continue;
             }
 
+            
             // if local queue is empty, try to steal from other queues
         }
     }
