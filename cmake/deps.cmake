@@ -17,12 +17,14 @@ CPMAddPackage(
   GIT_TAG master
 )
 
+# SDL2
 CPMAddPackage(
-  NAME Xenium
-  GITHUB_REPOSITORY mpoeter/xenium
-  GIT_TAG master
+  NAME SDL3
+  GITHUB_REPOSITORY libsdl-org/SDL
+  GIT_TAG preview-3.1.3
+  OPTIONS
+  "SDL_WERROR OFF"
 )
-
 
 if(PROJECTW_TESTS)
   CPMAddPackage(
@@ -34,18 +36,3 @@ if(PROJECTW_TESTS)
   list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
   include(Catch)
 endif()
-
-find_package(thread-pool QUIET)
-if(NOT thread-pool_FOUND)
-  FetchContent_Declare(
-    thread_pool
-    GIT_REPOSITORY https://github.com/DeveloperPaul123/thread-pool.git
-    GIT_TAG master)
-    FetchContent_GetProperties(thread_pool)
-    if(NOT thread_pool_POPULATED)
-	  FetchContent_Populate(thread_pool)
-	  add_subdirectory(${thread_pool_SOURCE_DIR} ${thread_pool_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
-endif()
-
-

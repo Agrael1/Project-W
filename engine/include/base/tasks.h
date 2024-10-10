@@ -125,7 +125,7 @@ public:
         return continuation;
     }
 
-    decltype(auto) get_result() const noexcept
+    decltype(auto) get_result() noexcept
         requires !std::is_void_v<ResultType>
     {
         if constexpr (std::is_reference_v<ResultType>) {

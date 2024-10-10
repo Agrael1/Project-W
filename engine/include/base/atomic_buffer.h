@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include <bit>
+#include  <new>
 
 namespace w::base {
 namespace detail {

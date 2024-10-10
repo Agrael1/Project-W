@@ -28,8 +28,8 @@ public:
     }
 
 private:
-    alignas(std::hardware_destructive_interference_size * 2) std::atomic<std::size_t> _bottom{ 0 };
-    alignas(std::hardware_destructive_interference_size * 2) std::atomic<std::size_t> _top{ 0 };
+    alignas(std::hardware_destructive_interference_size) std::atomic<std::size_t> _bottom{ 0 };
+    alignas(std::hardware_destructive_interference_size) std::atomic<std::size_t> _top{ 0 };
     container _items;
 };
 
