@@ -29,7 +29,16 @@ static w::action<int> main_async(int argc, char** argv)
 // Staged to reach thread pool
 static w::action<int> main_stage_async(int argc, char** argv)
 {
+    ///
     co_await w::resume_background();
+
+    
+    co_await w::resume_affine(w::global::current());
+    ///
+
+    co_await w::resume_background();
+
+
     co_return co_await main_async(argc, argv);
 }
 

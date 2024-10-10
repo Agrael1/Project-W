@@ -17,8 +17,10 @@ struct thread_unit {
         return a;
     };
     thread_unit() noexcept = default;
-    thread_unit(auto thread_func) noexcept
-        : thread(thread_func), rng(generate_seed())
+    thread_unit(auto thread_func, bool affinity = false) noexcept
+        : thread(thread_func)
+        , rng(generate_seed())
+        , affine_tasks(affinity ? std::make_unique<w::base::atomic_queue<std::coroutine_handle<>, 32>>() : nullptr)
     {
     }
 
@@ -133,7 +135,7 @@ public:
                 index = i;
                 thread_loop();
                 // printf("%zd thread stopped\n", i);
-            });
+            }, i == 0);
         }
     }
 
@@ -142,6 +144,18 @@ public:
     {
         // always push to local queue
         units[index].push_task(handle);
+        notifier.notify_one();
+    }
+    size_t current_unit() const noexcept
+    {
+        return index;
+    }
+
+    void submit_affine(std::coroutine_handle<> handle, size_t thread_idx) noexcept
+    {
+        // always push to local queue
+        units[thread_idx].push_affine_task(handle);
+        notifier.notify_all();
     }
     void stop() noexcept
     {
@@ -205,11 +219,12 @@ private:
     std::optional<std::coroutine_handle<>> wait_for_task() noexcept
     {
         auto& unit = units[index];
-        if (auto task = unit.pop_affine_task()) {
-            return task;
-        }
 
         do {
+            if (auto task = unit.pop_affine_task()) {
+                return task;
+            }
+
             thief_threads.fetch_add(1, std::memory_order::relaxed);
         i_explore:
             if (auto task = explore_task()) {

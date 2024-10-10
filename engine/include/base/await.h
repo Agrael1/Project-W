@@ -8,6 +8,8 @@ namespace detail {
 /// @brief Resumes the coroutine on the background thread pool
 /// @param handle Coroutine handle to resume
 void resume_background(std::coroutine_handle<> handle) noexcept;
+void resume_affine(std::coroutine_handle<> handle, size_t thread_index) noexcept;
+size_t current() noexcept;
 } // namespace detail
 
 /// @brief Resumes the coroutine on the background thread pool
@@ -34,6 +36,34 @@ void resume_background(std::coroutine_handle<> handle) noexcept;
 
     return awaitable{};
 }
+
+[[nodiscard]] inline auto resume_affine(size_t thread_index) noexcept
+{
+    struct awaitable {
+        bool await_ready() const noexcept
+        {
+            return false;
+        }
+
+        void await_resume() const noexcept
+        {
+        }
+
+        void await_suspend(std::coroutine_handle<> handle) const
+        {
+            detail::resume_affine(handle, thread_index);
+        }
+        size_t thread_index;
+    };
+
+    return awaitable{ thread_index };
+}
+
+namespace global {
+inline size_t current() noexcept
+{
+}
+} // namespace global
 
 /// @brief Fire and forget coroutine, does not return any value
 /// If an exception is thrown during the coroutine execution, it will be rethrown
