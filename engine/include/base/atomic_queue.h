@@ -46,7 +46,7 @@ bool atomic_queue<T, buffer_size>::try_push(value_type item) noexcept
             return false;
         }
     } while (!_items.try_put(b, item, std::memory_order_relaxed));
-    _bottom.store(b + 1, std::memory_order_release);
+    _bottom.store(b + 1, std::memory_order::release);
     return true;
 }
 
@@ -62,6 +62,6 @@ atomic_queue<T, buffer_size>::try_pop() noexcept
         return std::nullopt;
     }
     // get from the top
-    return _items.get(_top.fetch_sub(1, std::memory_order::relaxed), std::memory_order_relaxed);
+    return _items.get(_top.fetch_add(1, std::memory_order::relaxed), std::memory_order_relaxed);
 }
 } // namespace w::base

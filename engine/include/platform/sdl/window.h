@@ -1,6 +1,5 @@
 #pragma once
-#include <base/tasks.h>
-#include <base/result.h>
+#include <utility>
 
 struct SDL_Window;
 
@@ -36,6 +35,4 @@ private:
 private:
     SDL_Window* wnd;
 };
-
-w::action<w::result<window>> create_window_async(const char* title, int w, int h, uint32_t flags);
 } // namespace w::sdl

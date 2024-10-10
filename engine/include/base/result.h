@@ -7,6 +7,11 @@ template<typename Message>
 struct [[nodiscard]] basic_result {
 public:
     Message message{};
+
+    constexpr operator bool() const noexcept
+    {
+        return message.empty();
+    }
 };
 
 template<typename Message>
