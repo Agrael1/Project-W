@@ -1,18 +1,46 @@
 #include <base/await.h>
 #include <iostream>
+#include <base/tasks.h>
+#include <base/thread_pool.h>
 
-w::fire_and_forget main_async()
+#include <app.h>
+#include <span>
+#include <ranges>
+
+
+
+static w::action<int> main_async(int argc, char** argv)
 {
-    co_await w::resume_background();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "Hello, world!" << std::endl;
+    std::span<char*> args(argv + 1, argc - 1);
+
+    bool fullscreen = false;
+    for (auto arg : args | std::views::transform([](auto arg) { return std::string_view(arg); })) {
+        if (arg == "--fullscreen") {
+            fullscreen = true;
+        }
+    }
+
+    // Create an app
+    ut::app app;
+    co_await app.init_async();
+    co_return 0;
 }
 
-int main()
+// Staged to reach thread pool
+static w::action<int> main_stage_async(int argc, char** argv)
 {
-    auto scoped_pool = w::base::thread_pool::init_scoped();
+    co_await w::resume_background();
+    co_return co_await main_async(argc, argv);
+}
 
-    main_async();
-    std::cout << "Hello from main!" << std::endl;
-    return 0;
+
+int main(int argc, char** argv)
+{
+    auto token = w::base::global_thread_pool_token::init_scoped();
+    try {
+        return main_stage_async(argc, argv).get();
+    } catch (int e) {
+        std::cout << "Caught exception: " << e << std::endl;
+        return -1;
+    }
 }
