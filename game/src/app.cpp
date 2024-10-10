@@ -19,7 +19,6 @@ w::action<void> ut::app::init_async(uint32_t width, uint32_t height, bool fullsc
         std::construct_at(&wnd, std::move(window), std::move(factory));
     }(fullscreen, width, height);
 
-    co_await wnd_task;
-
+    co_await w::when_all(gfx.init_async(), wnd_task);
     co_return;
 }

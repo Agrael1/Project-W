@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include <base/async_queue.h>
+#include <base/stealing_deque.h>
 #include <thread>
 #include <vector>
 #include <set>

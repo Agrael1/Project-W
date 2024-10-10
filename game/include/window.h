@@ -14,6 +14,10 @@ public:
     const w::sdl::window& get() const noexcept { return wnd; }
 
 public:
+    std::pair<int, int> pixel_size() const noexcept
+    {
+        return wnd.pixel_size();
+    }
 
 private:
     w::sdl::sdl_factory factory;

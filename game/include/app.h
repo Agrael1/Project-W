@@ -1,6 +1,6 @@
 #pragma once
-#include <base/tasks.h>
 #include <window.h>
+#include <gfx/graphics.h>
 
 namespace ut {
 class app
@@ -13,7 +13,9 @@ public:
 
 public:
 private:
-    ut::window wnd;
     size_t ui_thread;
+    
+    ut::window wnd;
+    w::graphics gfx;
 };
 } // namespace ut

@@ -28,6 +28,7 @@ public:
 
 public:
     SDL_Window* get() const noexcept { return wnd; }
+    std::pair<int, int> pixel_size() const noexcept;
 
 private:
     void destroy() noexcept;
