@@ -1,11 +1,11 @@
 #pragma once
-#include <base/async_queue.h>
+#include <base/stealing_deque.h>
+#include <base/atomic_queue.h>
 #include <base/xoshiro.h>
 #include <base/event_count.h>
 #include <coroutine>
 #include <optional>
 #include <thread>
-#include <mutex>
 #include <immintrin.h>
 
 namespace w::base {
@@ -54,7 +54,7 @@ public:
                 return std::nullopt;
             }
             full.store(false, std::memory_order::relaxed);
-
+            full.notify_one();
             if (val && val.value()) {
                 return val;
             }
@@ -67,6 +67,32 @@ public:
             full.store(true, std::memory_order::relaxed);
             full.wait(true, std::memory_order::relaxed); // wait until popped or stolen
         }
+    }
+    bool push_affine_task(std::coroutine_handle<> handle) noexcept
+    {
+        if (!affine_tasks) {
+            return false; // no affine tasks
+        }
+
+        while (!affine_tasks->try_push(handle)) {
+            full_affine.store(true, std::memory_order::relaxed);
+            full_affine.wait(true, std::memory_order::relaxed); // wait until popped
+        }
+        return true;
+    }
+    std::optional<std::coroutine_handle<>> pop_affine_task() noexcept
+    {
+        if (!affine_tasks) {
+            return std::nullopt; // no affine tasks
+        }
+
+        auto val = affine_tasks->try_pop();
+        if (val == std::nullopt) {
+            return std::nullopt;
+        }
+        full_affine.store(false, std::memory_order::relaxed);
+        full_affine.notify_one();
+        return val;
     }
     bool empty_queue() const noexcept
     {
@@ -86,8 +112,10 @@ public:
 private:
     xoroshiro rng{ 0 };
     std::jthread thread;
-    base::stealing_deque<std::coroutine_handle<>, 256> queue;
+    w::base::stealing_deque<std::coroutine_handle<>, 256> queue;
+    std::unique_ptr<w::base::atomic_queue<std::coroutine_handle<>, 32>> affine_tasks;
     std::atomic<bool> full = false;
+    std::atomic<bool> full_affine = false;
 };
 
 class thread_pool
@@ -104,7 +132,7 @@ public:
             std::construct_at(units.get() + i, [this, i]() {
                 index = i;
                 thread_loop();
-                printf("%zd thread stopped\n", i);
+                // printf("%zd thread stopped\n", i);
             });
         }
     }
@@ -120,7 +148,7 @@ public:
         for (size_t i = 0; i < unit_count; ++i) {
             units[i].request_stop();
         }
-        printf("stopping\n");
+        // printf("stopping\n");
         notifier.notify_all();
     }
 
@@ -160,7 +188,7 @@ private:
     }
     void exploit_task(std::coroutine_handle<> handle) noexcept
     {
-        if (!active_threads.fetch_add(1, std::memory_order::relaxed) && !thief_threads.load()) {
+        if (!active_threads.fetch_add(1, std::memory_order::relaxed) && !thief_threads.load(std::memory_order::relaxed)) {
             notifier.notify_one();
         }
 
@@ -177,6 +205,10 @@ private:
     std::optional<std::coroutine_handle<>> wait_for_task() noexcept
     {
         auto& unit = units[index];
+        if (auto task = unit.pop_affine_task()) {
+            return task;
+        }
+
         do {
             thief_threads.fetch_add(1, std::memory_order::relaxed);
         i_explore:
@@ -206,9 +238,9 @@ private:
 
             if (thief_threads.fetch_sub(1, std::memory_order::relaxed) != 1 || active_threads.load() <= 0) {
                 auto epoch = notifier.prepare_wait();
-                printf("%zd waiting\n", index);
+                // printf("%zd waiting\n", index);
                 notifier.wait(epoch);
-                printf("%zd woke up\n", index);
+                // printf("%zd woke up\n", index);
             }
         } while (true);
     }

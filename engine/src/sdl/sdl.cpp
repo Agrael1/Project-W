@@ -1,4 +1,4 @@
-#include <sdl/sdl.h>
+#include <platform/sdl/sdl.h>
 #include <SDL3/SDL_init.h>
 
 

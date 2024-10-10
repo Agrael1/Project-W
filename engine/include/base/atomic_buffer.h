@@ -1,7 +1,7 @@
 #pragma once
 #include <atomic>
 #include <bit>
-#include  <new>
+#include <new>
 
 namespace w::base {
 namespace detail {
@@ -38,7 +38,13 @@ struct atomic_buffer {
 
 public:
     T get_unchecked(std::size_t idx, std::memory_order order) const noexcept { return _items[detail::remap_index<shuffle>(idx & mask)].load(order); }
+    T get(std::size_t idx, std::memory_order order) noexcept { return _items[detail::remap_index<shuffle>(idx & mask)].exchange(nullval, std::memory_order::relaxed); }
     void put_unchecked(std::size_t idx, T value, std::memory_order order) noexcept { _items[detail::remap_index<shuffle>(idx & mask)].store(value, order); }
+    bool try_put(std::size_t idx, T value, std::memory_order order) noexcept
+    {
+        auto xn = nullval;
+        return _items[detail::remap_index<shuffle>(idx & mask)].compare_exchange_strong(xn, value, order, std::memory_order::relaxed);
+    }
 
     static constexpr std::size_t capacity() noexcept { return Capacity; }
     static constexpr bool can_grow() noexcept { return false; }

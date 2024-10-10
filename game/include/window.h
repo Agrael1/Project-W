@@ -1,5 +1,5 @@
 #pragma once
-#include <sdl/window.h>
+#include <platform/sdl/window.h>
 
 namespace ut {
 class window

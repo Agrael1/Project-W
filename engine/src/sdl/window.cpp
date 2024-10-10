@@ -1,4 +1,4 @@
-#include <sdl/window.h>
+#include <platform/sdl/window.h>
 #include <SDL3/SDL_video.h>
 
 w::action<w::result<w::sdl::window>> w::sdl::create_window_async(const char* title, int w, int h, uint32_t flags)

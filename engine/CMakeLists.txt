@@ -7,6 +7,7 @@ set(HEADERS
 "include/base/xoshiro.h" 
 "include/base/await.h" 
 "include/base/await_traits.h" 
+"include/base/atomic_queue.h" 
 "include/base/tasks.h"  
 "include/base/atomic_buffer.h"  
 "include/base/event_count.h"  
@@ -18,11 +19,11 @@ set(HEADERS
 "include/math/quaternion_math.h"
 "include/ecs/transform.h"
 "include/ecs/camera.h"
-"include/sdl/sdl.h"
-"include/sdl/window.h"
+"include/platform/sdl/sdl.h"
+"include/platform/sdl/window.h"
   
   
- "include/base/async_queue.h" "include/base/result.h")
+ "include/base/stealing_deque.h" "include/base/result.h")
 set(SOURCES "src/graphics.cpp" "src/base/thread_pool.cpp" "src/sdl/window.cpp" "src/sdl/sdl.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
