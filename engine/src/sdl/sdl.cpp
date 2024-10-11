@@ -2,19 +2,30 @@
 #include <SDL3/SDL_init.h>
 
 
-w::sdl::scoped_sdl::~scoped_sdl() noexcept
+w::sdl::sdl_factory::~sdl_factory() noexcept
 {
-    uninit_sdl();
+    SDL_Quit();
 }
-w::result<w::sdl::scoped_sdl> w::sdl::init_sdl() noexcept
+
+w::result<w::sdl::sdl_factory> w::sdl::create_factory() noexcept
 {
     if (!::SDL_Init(SDL_INIT_VIDEO)) {
         return { SDL_GetError(), w::error };
     }
-    return {};
+    return { w::sdl::sdl_factory{true} };
 }
 
-void w::sdl::uninit_sdl() noexcept
+w::result<w::sdl::window>
+w::sdl::sdl_factory::create_window(const char* title, int w, int h, uint32_t flags) const
 {
-    SDL_Quit();
+    SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
+    if (!window) {
+        return w::result<w::sdl::window>{
+            SDL_GetError(), w::error
+        };
+    }
+    return w::result<w::sdl::window>{
+        w::sdl::window{ window }
+    };
 }
+

@@ -3,6 +3,8 @@ project(WEngine)
 set(HEADERS 
 "include/gfx/graphics.h" 
 "include/gfx/swapchain.h" 
+"include/gfx/platform.h" 
+"include/gfx/misc.h" 
 "include/base/thread_pool.h" 
 "include/base/xoshiro.h" 
 "include/base/await.h" 
@@ -24,7 +26,7 @@ set(HEADERS
   
   
  "include/base/stealing_deque.h" "include/base/result.h")
-set(SOURCES "src/graphics.cpp" "src/base/thread_pool.cpp" "src/sdl/window.cpp" "src/sdl/sdl.cpp")
+set(SOURCES "src/gfx/graphics.cpp" "src/base/thread_pool.cpp" "src/sdl/window.cpp" "src/sdl/sdl.cpp" "src/gfx/platform.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC include)

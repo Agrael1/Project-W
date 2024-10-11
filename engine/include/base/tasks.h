@@ -2,7 +2,6 @@
 #include <base/await.h>
 #include <iostream>
 #include <format>
-#include <condition_variable>
 
 namespace w {
 template<typename PromiseType>
@@ -193,7 +192,7 @@ struct task : coro_type<task_promise<ReturnType, task<ReturnType>>> {
     using coro_type<task_promise<ReturnType, task<ReturnType>>>::coro_type;
 };
 
-/// @brief Eager task coroutine
+/// @brief Eager action coroutine. Very fast but must be waited upon in order for it to be destroyed, otherwise it may deadlock.
 /// @tparam ReturnType Value type
 template<typename ReturnType>
 struct action : coro_type<action_promise<ReturnType, action<ReturnType>>> {
@@ -207,4 +206,14 @@ struct action : coro_type<action_promise<ReturnType, action<ReturnType>>> {
         handle.promise().set_continuation(awaiting_coroutine);
     }
 };
+
+/// @brief Wait for all tasks to finish. Evaluation is done from left to right.
+/// @param args Tasks
+/// @return Task that finishes when all tasks are done
+template<typename ...Args>
+task<void> when_all(Args&&... args)
+{
+    (co_await std::forward<Args>(args), ...);
+}
+
 } // namespace w

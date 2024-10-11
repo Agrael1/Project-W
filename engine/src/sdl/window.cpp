@@ -1,20 +1,16 @@
 #include <platform/sdl/window.h>
 #include <SDL3/SDL_video.h>
 
-w::action<w::result<w::sdl::window>> w::sdl::create_window_async(const char* title, int w, int h, uint32_t flags)
+std::pair<int, int> w::sdl::window::pixel_size() const noexcept
 {
-    SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
-    if (!window) {
-        co_return w::result<w::sdl::window>{
-            SDL_GetError(), w::error
-        };
-    }
-    co_return w::result<w::sdl::window>{
-        w::sdl::window{ window }
-    };
+    int w = 0, h = 0;
+    SDL_GetWindowSizeInPixels(wnd, &w, &h);
+    return { w, h };
 }
 
 void w::sdl::window::destroy() noexcept
 {
-    SDL_DestroyWindow(wnd);
+    if (wnd) {
+        SDL_DestroyWindow(wnd);
+    }
 }

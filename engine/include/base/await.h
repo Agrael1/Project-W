@@ -62,6 +62,7 @@ size_t current() noexcept;
 namespace global {
 inline size_t current() noexcept
 {
+    return detail::current();
 }
 } // namespace global
 
