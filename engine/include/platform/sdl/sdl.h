@@ -3,7 +3,7 @@
 #include <base/result.h>
 
 namespace w::sdl {
-struct sdl_factory {
+class sdl_factory {
     friend w::result<sdl_factory> create_factory() noexcept;
 
 public:

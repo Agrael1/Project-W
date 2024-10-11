@@ -1,6 +1,7 @@
 #pragma once
 #include <window.h>
 #include <gfx/graphics.h>
+#include <gfx/platform.h>
 
 namespace ut {
 class app
@@ -17,5 +18,7 @@ private:
     
     ut::window wnd;
     w::graphics gfx;
+    w::platform_extension platform;
+    w::swapchain swapchain;
 };
 } // namespace ut
