@@ -23,6 +23,7 @@ set(HEADERS
 "include/ecs/camera.h"
 "include/platform/sdl/sdl.h"
 "include/platform/sdl/window.h"
+"include/platform/shared/window_event.h"
   
   
  "include/base/stealing_deque.h" "include/base/result.h")

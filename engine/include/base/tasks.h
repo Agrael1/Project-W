@@ -2,6 +2,7 @@
 #include <base/await.h>
 #include <iostream>
 #include <format>
+#include <span>
 
 namespace w {
 template<typename PromiseType>
@@ -19,12 +20,27 @@ public:
     explicit coro_type(std::coroutine_handle<> coroutine) noexcept
         : coroutine(coroutine)
     {
-        std::cout << std::format("Coroutine {} created\n", typeid(PromiseType).name());
+        //std::cout << std::format("Coroutine {} created\n", typeid(PromiseType).name());
+    }
+
+    coro_type(const coro_type&) = delete;
+    coro_type(coro_type&& other) noexcept
+        : coroutine(std::move(other.coroutine))
+    {
+    }
+
+    coro_type& operator=(const coro_type&) = delete;
+    coro_type& operator=(coro_type&& other) noexcept
+    {
+        if (this != &other) {
+            coroutine = std::move(other.coroutine);
+        }
+        return *this;
     }
 
     ~coro_type() noexcept
     {
-        std::cout << std::format("Coroutine {} destroyed\n", typeid(PromiseType).name());
+        //std::cout << std::format("Coroutine {} destroyed\n", typeid(PromiseType).name());
 
         if (await_ready())
             return;
@@ -210,10 +226,22 @@ struct action : coro_type<action_promise<ReturnType, action<ReturnType>>> {
 /// @brief Wait for all tasks to finish. Evaluation is done from left to right.
 /// @param args Tasks
 /// @return Task that finishes when all tasks are done
-template<typename ...Args>
+template<typename... Args>
+    requires(w::detail::is_awaiter<Args> && ...)
 task<void> when_all(Args&&... args)
 {
     (co_await std::forward<Args>(args), ...);
+}
+
+/// @brief Wait for all tasks to finish. Evaluation is done from left to right.
+/// @param args Tasks
+/// @return Task that finishes when all tasks are done
+template<typename T>
+task<void> when_all(std::span<T> tasks)
+{
+    for (auto&& task : tasks) {
+        co_await task;
+    }
 }
 
 } // namespace w

@@ -1,4 +1,5 @@
 #pragma once
+#include <platform/shared/window_event.h>
 #include <utility>
 
 struct SDL_Window;
@@ -27,13 +28,19 @@ public:
     }
 
 public:
-    SDL_Window* get() const noexcept { return wnd; }
     std::pair<int, int> pixel_size() const noexcept;
+    void set_title(const char* title) noexcept;
+    void set_fullscreen(bool fullscreen) noexcept;
+    window_event poll_events() noexcept;
+
+public:
+    SDL_Window* get() const noexcept { return wnd; }
 
 private:
     void destroy() noexcept;
 
 private:
     SDL_Window* wnd;
+    bool fullscreen = false;
 };
 } // namespace w::sdl

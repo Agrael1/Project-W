@@ -1,10 +1,10 @@
 #include <platform/sdl/sdl.h>
 #include <SDL3/SDL_init.h>
 
-
 w::sdl::sdl_factory::~sdl_factory() noexcept
 {
-    SDL_Quit();
+    if (initialized)
+        ::SDL_Quit();
 }
 
 w::result<w::sdl::sdl_factory> w::sdl::create_factory() noexcept
@@ -12,7 +12,7 @@ w::result<w::sdl::sdl_factory> w::sdl::create_factory() noexcept
     if (!::SDL_Init(SDL_INIT_VIDEO)) {
         return { SDL_GetError(), w::error };
     }
-    return { w::sdl::sdl_factory{true} };
+    return { w::sdl::sdl_factory{ true } };
 }
 
 w::result<w::sdl::window>
@@ -28,4 +28,3 @@ w::sdl::sdl_factory::create_window(const char* title, int w, int h, uint32_t fla
         w::sdl::window{ window }
     };
 }
-

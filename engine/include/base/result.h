@@ -2,7 +2,6 @@
 #include <string_view>
 
 namespace w {
-
 template<typename Message>
 struct [[nodiscard]] basic_result {
 public:
@@ -16,6 +15,7 @@ public:
 
 template<typename Message>
 static constexpr basic_result<Message> success{};
+using error_message = basic_result<std::string_view>;
 
 struct error_t {
 };

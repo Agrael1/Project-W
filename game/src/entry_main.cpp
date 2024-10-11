@@ -39,6 +39,7 @@ static w::action<int> main_async(int argc, char** argv)
     // Create an app
     ut::app app{ ui_thread };
     co_await app.init_async(width, height, fullscreen);
+    co_await app.run_async();
     co_return 0;
 }
 
