@@ -11,6 +11,7 @@ endif()
 include(${GET_CPM_FILE})
 
 # Add CPM dependencies here
+#set(WISDOM_FORCE_VULKAN 1)
 CPMAddPackage(
   NAME Wisdom
   GITHUB_REPOSITORY Agrael1/Wisdom

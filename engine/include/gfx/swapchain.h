@@ -11,16 +11,17 @@ public:
         : swap(std::move(swap)) { }
 
 public:
-    void present() noexcept
+    w::error_message present() noexcept
     {
-        swap.Present();
+        return to_error(swap.Present());
     }
     w::error_message resize(uint32_t w, uint32_t h) noexcept
     {
+        wis::DX12Info::Poll();
         return to_error(swap.Resize(w, h));
     }
 
-private:
+public:
     wis::SwapChain swap;
 };
 } // namespace w

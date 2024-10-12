@@ -8,8 +8,7 @@
 #include <ranges>
 #include <codecvt>
 
-
-static w::action<int> main_async(int argc, char** argv)
+static w::action<ut::app> main_async(int argc, char** argv)
 {
     auto ui_thread = w::global::current();
     std::span<char*> args(argv + 1, argc - 1);
@@ -39,12 +38,11 @@ static w::action<int> main_async(int argc, char** argv)
     // Create an app
     ut::app app{ ui_thread };
     co_await app.init_async(width, height, fullscreen);
-    co_await app.run_async();
-    co_return 0;
+    co_return std::move(app);
 }
 
 // Staged to reach thread pool
-static w::action<int> main_stage_async(int argc, char** argv)
+static w::action<ut::app> main_stage_async(int argc, char** argv)
 {
     // Resume on the background thread pool, here always on 0 thread
     auto ui_thread = w::global::current();
@@ -52,12 +50,17 @@ static w::action<int> main_stage_async(int argc, char** argv)
     co_return co_await main_async(argc, argv);
 }
 
-
 int main(int argc, char** argv)
 {
-    auto token = w::base::global_thread_pool_token::init_scoped();
     try {
-        return main_stage_async(argc, argv).get();
+        ut::app app;
+        {
+            auto token = w::base::global_thread_pool_token::init_scoped();
+            app = main_stage_async(argc, argv).get();
+            app.run();
+        }
+
+        return 0;
     } catch (int e) {
         std::cout << "Caught exception: " << e << std::endl;
         return -1;

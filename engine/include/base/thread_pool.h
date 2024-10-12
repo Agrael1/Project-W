@@ -253,9 +253,9 @@ private:
 
             if (thief_threads.fetch_sub(1, std::memory_order::relaxed) != 1 || active_threads.load() <= 0) {
                 auto epoch = notifier.prepare_wait();
-                // printf("%zd waiting\n", index);
+                printf("%zd waiting\n", index);
                 notifier.wait(epoch);
-                // printf("%zd woke up\n", index);
+                printf("%zd woke up\n", index);
             }
         } while (true);
     }

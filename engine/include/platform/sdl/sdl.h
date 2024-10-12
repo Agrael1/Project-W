@@ -17,6 +17,7 @@ public:
         if (this != &o) {
             initialized = std::exchange(o.initialized, false);
         }
+        return *this;
     }
     ~sdl_factory() noexcept;
 

@@ -39,12 +39,12 @@ w::action<void> ut::app::init_async(uint32_t width, uint32_t height, bool fullsc
     co_await w::when_all(swap_task);
 }
 
-w::action<void> ut::app::run_async()
+void ut::app::run()
 {
     while (true)
     {
-        co_await w::resume_affine(ui_thread); // Resume on the UI thread
-        if (co_await process_events()) {
+        //co_await w::resume_affine(ui_thread); // Resume on the UI thread
+        if (process_events()) {
             break;
         }
 
@@ -52,33 +52,61 @@ w::action<void> ut::app::run_async()
         // Render the frame
 
 
+        swapchain.present();
     }
-    co_return;
 }
 
-w::action<bool> ut::app::process_events()
+w::action<bool> ut::app::process_events_async()
 {
+    // do PMR here
     std::vector<w::action<void>> tasks;
     w::window_event event{};
     do {
         event = wnd.poll_events();
         switch (event) {
         case w::window_event::Quit:
-            co_await w::when_all(std::span{ tasks });
+            if (!tasks.empty())
+                co_await w::when_all(std::span{ tasks });
             co_return true; // Quit the application
         case w::window_event::Resize:
             auto [w, h] = wnd.pixel_size();
-            tasks.emplace_back(on_resize(w, h));
+            tasks.emplace_back(on_resize_async(w, h));
             break;
         }
     } while (event != w::window_event::NoEvent);
 
-    co_await w::when_all(std::span{ tasks });
+    if (!tasks.empty())
+        co_await w::when_all(std::span{ tasks });
     co_return false;
 }
-w::action<void> ut::app::on_resize(int width, int height)
+bool ut::app::process_events()
+{
+    // do PMR here
+    std::vector<w::action<void>> tasks;
+    w::window_event event{};
+    do {
+        event = wnd.poll_events();
+        switch (event) {
+        case w::window_event::Quit:
+            return true; // Quit the application
+        case w::window_event::Resize:
+            auto [w, h] = wnd.pixel_size();
+            on_resize(w, h);
+            break;
+        }
+    } while (event != w::window_event::NoEvent);
+    return false;
+}
+w::action<void> ut::app::on_resize_async(int width, int height)
 {
     co_await w::resume_background();
+    auto e = swapchain.resize(uint32_t(width), uint32_t(height)); // Costly operation
+    if (!bool(e)) {
+        ; // log error
+    }
+}
+void ut::app::on_resize(int width, int height)
+{
     auto e = swapchain.resize(uint32_t(width), uint32_t(height)); // Costly operation
     if (!bool(e)) {
         ; // log error
