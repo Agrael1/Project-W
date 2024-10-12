@@ -32,6 +32,11 @@ w::result<w::swapchain> w::platform_extension::create_swapchain(w::graphics& gfx
         return { "Platform is not selected", w::error };
     }
 
+    auto [r, fence] = gfx.create_fence();
+    if (failed(r)) {
+        return { r.error, w::error };
+    }
+
     auto [width, height] = wnd.pixel_size();
     wis::SwapchainDesc desc{
         .size = { uint32_t(width), uint32_t(height) },
@@ -50,7 +55,7 @@ w::result<w::swapchain> w::platform_extension::create_swapchain(w::graphics& gfx
             if (r.status != wis::Status::Ok) {
                 return { r.error, w::error };
             }
-            return { std::move(swap) };
+            return w::swapchain{ std::move(swap), std::move(fence) };
         }
     } break;
 #elif defined(SDL_PLATFORM_LINUX)
@@ -70,7 +75,7 @@ w::result<w::swapchain> w::platform_extension::create_swapchain(w::graphics& gfx
             if (r.status != wis::Status::Ok) {
                 return { r.error, w::error };
             }
-            return { std::move(swap) };
+            return w::swapchain{ std::move(swap), std::move(fence) };
         }
     } break;
 #endif

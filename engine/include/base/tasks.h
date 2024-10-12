@@ -20,7 +20,7 @@ public:
     explicit coro_type(std::coroutine_handle<> coroutine) noexcept
         : coroutine(coroutine)
     {
-        std::cout << std::format("Coroutine {} created\n", typeid(PromiseType).name());
+        //std::cout << std::format("Coroutine {} created\n", typeid(PromiseType).name());
     }
 
     coro_type(const coro_type&) = delete;
@@ -40,7 +40,7 @@ public:
 
     ~coro_type() noexcept
     {
-        std::cout << std::format("Coroutine {} destroyed\n", typeid(PromiseType).name());
+        //std::cout << std::format("Coroutine {} destroyed\n", typeid(PromiseType).name());
 
         if (await_ready())
             return;
@@ -230,6 +230,9 @@ template<typename... Args>
     requires(w::detail::is_awaiter<Args> && ...)
 task<void> when_all(Args&&... args)
 {
+    if constexpr (sizeof...(args) == 1) {
+        static_assert(false, "when_all requires at least two arguments");
+    }
     (co_await std::forward<Args>(args), ...);
 }
 

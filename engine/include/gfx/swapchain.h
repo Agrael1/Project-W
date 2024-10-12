@@ -3,25 +3,29 @@
 #include <gfx/misc.h>
 
 namespace w {
-class swapchain
+class graphics;
+class swapchain final
 {
 public:
     swapchain() noexcept = default;
-    swapchain(wis::SwapChain&& swap) noexcept
-        : swap(std::move(swap)) { }
+    swapchain(wis::SwapChain&& swap, wis::Fence&& fence) noexcept
+        : swap(std::move(swap)), fence(std::move(fence)) { }
 
 public:
-    w::error_message present() noexcept
+    uint64_t get_frame_index() const noexcept
     {
-        return to_error(swap.Present());
+        return frame_index;
     }
+    w::error_message present(w::graphics& gfx) noexcept;
     w::error_message resize(uint32_t w, uint32_t h) noexcept
     {
-        wis::DX12Info::Poll();
         return to_error(swap.Resize(w, h));
     }
 
 public:
     wis::SwapChain swap;
+    wis::Fence fence;
+    std::array<uint64_t, 3> fence_values{};
+    uint64_t frame_index = 0;
 };
 } // namespace w

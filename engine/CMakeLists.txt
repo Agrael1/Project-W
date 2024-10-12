@@ -27,7 +27,7 @@ set(HEADERS
   
   
  "include/base/stealing_deque.h" "include/base/result.h")
-set(SOURCES "src/gfx/graphics.cpp" "src/base/thread_pool.cpp" "src/sdl/window.cpp" "src/sdl/sdl.cpp" "src/gfx/platform.cpp")
+set(SOURCES "src/gfx/graphics.cpp" "src/base/thread_pool.cpp" "src/sdl/window.cpp" "src/sdl/sdl.cpp" "src/gfx/platform.cpp" "src/gfx/swapchain.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC include)

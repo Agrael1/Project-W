@@ -27,6 +27,10 @@ public:
     {
         return extended_alloc;
     }
+    auto create_fence() const noexcept
+    {
+        return device.CreateFence();
+    }
 
 private:
     void create_device(const wis::Factory& factory);

@@ -36,23 +36,22 @@ w::action<void> ut::app::init_async(uint32_t width, uint32_t height, bool fullsc
         std::construct_at(&swapchain, std::move(swap));
     }();
 
-    co_await w::when_all(swap_task);
+    co_await swap_task;
 }
 
-void ut::app::run()
+w::action<int> ut::app::run_async()
 {
     while (true)
     {
-        //co_await w::resume_affine(ui_thread); // Resume on the UI thread
         if (process_events()) {
-            break;
+            co_return 0;
         }
 
         //co_await w::resume_background(); // Resume on the background thread
         // Render the frame
 
 
-        swapchain.present();
+        swapchain.present(gfx);
     }
 }
 
